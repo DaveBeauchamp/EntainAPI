@@ -18,6 +18,7 @@ type RacesRepo interface {
 
 	// List will return a list of races.
 	List(filter *racing.ListRacesRequestFilter) ([]*racing.Race, error)
+	//ListVisible(filter *racing.ListVisibleRacesRequestFilter) ([]*racing.Race, error)
 }
 
 type racesRepo struct {
@@ -73,6 +74,13 @@ func (r *racesRepo) applyFilter(query string, filter *racing.ListRacesRequestFil
 
 	if len(filter.MeetingIds) > 0 {
 		clauses = append(clauses, "meeting_id IN ("+strings.Repeat("?,", len(filter.MeetingIds)-1)+"?)")
+
+		for _, meetingID := range filter.MeetingIds {
+			args = append(args, meetingID)
+		}
+	}
+	if len(filter.VisibleRaces) > 0 {
+		clauses = append(clauses, " visible = 1; ")
 
 		for _, meetingID := range filter.MeetingIds {
 			args = append(args, meetingID)
