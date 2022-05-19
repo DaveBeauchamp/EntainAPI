@@ -11,6 +11,15 @@ service Racing {
   rpc ListRaces(ListRacesRequest) returns (ListRacesResponse) {
     option (google.api.http) = { post: "/v1/list-races", body: "*" };
   }
+  // ListVisibleRaces will return a collection of all races that are flagged visible.
+  rpc ListVisibleRaces(ListRacesRequest) returns (ListRacesResponse) {
+    option (google.api.http) = { post: "/v1/list-races/{filter.visible_races}", body: "*" };
+  }
+  // ListRacesByAdvertisedStartTime will return a collection of all races that are
+  // ordered by start time. NOTE USE asc or desc
+  rpc ListRacesByAdvertisedStartTime(ListRacesRequest) returns (ListRacesResponse) {
+    option (google.api.http) = { post: "/v1/races-orderby/{filter.orderBy}", body: "*" };
+  }
 }
 
 /* Requests/Responses */
@@ -28,6 +37,8 @@ message ListRacesResponse {
 // Filter for listing races.
 message ListRacesRequestFilter {
   repeated int64 meeting_ids = 1;
+  bool visible_races = 5;
+  string orderBy = 7;
 }
 
 /* Resources */
