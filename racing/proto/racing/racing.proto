@@ -13,6 +13,8 @@ service Racing {
   // ListRacesByAdvertisedStartTime will return a collection of all races that are
   // ordered by start time.
   rpc ListRacesByAdvertisedStartTime(ListRacesRequest) returns (ListRacesResponse) {}
+  // GetRaceById returns a race from it's ID.
+  rpc GetRaceById(GetRaceByIdRequest) returns (ListRacesResponse) {}
 }
 
 /* Requests/Responses */
@@ -32,6 +34,16 @@ message ListRacesRequestFilter {
   repeated int64 meeting_ids = 1;
   bool visible_races = 5;
   string orderBy = 7;
+}
+
+// Request for GetRaceById call.
+message GetRaceByIdRequest {
+  GetRaceByIdRequestFilter filter = 1;
+}
+
+// Filter for GetRaceById.
+message GetRaceByIdRequestFilter {
+  int64 id = 1;
 }
 
 /* Resources */
