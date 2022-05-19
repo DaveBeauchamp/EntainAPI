@@ -2,6 +2,7 @@ package db
 
 import (
 	"database/sql"
+	"fmt"
 	"github.com/golang/protobuf/ptypes"
 	_ "github.com/mattn/go-sqlite3"
 	"strings"
@@ -18,7 +19,8 @@ type RacesRepo interface {
 
 	// List will return a list of races.
 	List(filter *racing.ListRacesRequestFilter) ([]*racing.Race, error)
-	//ListVisible(filter *racing.ListVisibleRacesRequestFilter) ([]*racing.Race, error)
+	// GetRaceById returns a race from it's ID.
+	GetRace(filter *racing.GetRaceByIdRequestFilter) ([]*racing.Race, error)
 }
 
 type racesRepo struct {
@@ -94,6 +96,42 @@ func (r *racesRepo) applyFilter(query string, filter *racing.ListRacesRequestFil
 		} else {
 			query += " WHERE " + strings.Join(clauses, " AND ")
 		}
+	}
+
+	return query, args
+}
+
+func (r *racesRepo) GetRace(filter *racing.GetRaceByIdRequestFilter) ([]*racing.Race, error) {
+	var (
+		err   error
+		query string
+		args  []interface{}
+	)
+
+	query = getRaceQueries()[racesList]
+
+	query, args = r.getRaceFilter(query, filter)
+
+	rows, err := r.db.Query(query, args...)
+	if err != nil {
+		return nil, err
+	}
+
+	return r.scanRaces(rows)
+}
+
+func (r *racesRepo) getRaceFilter(query string, filter *racing.GetRaceByIdRequestFilter) (string, []interface{}) {
+	var (
+		args []interface{}
+	)
+
+	if filter == nil {
+		return query, args
+	}
+
+	if &filter.Id != nil {
+		var clause = fmt.Sprintf(" where id = %d", filter.Id)
+		query += clause
 	}
 
 	return query, args
