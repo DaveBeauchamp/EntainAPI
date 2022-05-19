@@ -10,6 +10,9 @@ service Racing {
   rpc ListRaces(ListRacesRequest) returns (ListRacesResponse) {}
   // ListVisibleRaces will return a collection of all races that are flagged visible.
   rpc ListVisibleRaces(ListRacesRequest) returns (ListRacesResponse) {}
+  // ListRacesByAdvertisedStartTime will return a collection of all races that are
+  // ordered by start time.
+  rpc ListRacesByAdvertisedStartTime(ListRacesRequest) returns (ListRacesResponse) {}
 }
 
 /* Requests/Responses */
@@ -27,7 +30,8 @@ message ListRacesResponse {
 // Filter for listing races.
 message ListRacesRequestFilter {
   repeated int64 meeting_ids = 1;
-  repeated bool visible_races = 5;
+  bool visible_races = 5;
+  string orderBy = 7;
 }
 
 /* Resources */

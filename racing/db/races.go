@@ -74,21 +74,26 @@ func (r *racesRepo) applyFilter(query string, filter *racing.ListRacesRequestFil
 
 	if len(filter.MeetingIds) > 0 {
 		clauses = append(clauses, "meeting_id IN ("+strings.Repeat("?,", len(filter.MeetingIds)-1)+"?)")
-
 		for _, meetingID := range filter.MeetingIds {
 			args = append(args, meetingID)
 		}
 	}
-	if len(filter.VisibleRaces) > 0 {
+	if filter.VisibleRaces == true {
 		clauses = append(clauses, " visible = 1; ")
+	}
 
-		for _, meetingID := range filter.MeetingIds {
-			args = append(args, meetingID)
-		}
+	if strings.ToUpper(filter.OrderBy) == "DESC" {
+		clauses = append(clauses, " order by advertised_start_time desc; ")
+	} else if strings.ToUpper(filter.OrderBy) == "ASC" {
+		clauses = append(clauses, " order by advertised_start_time asc; ")
 	}
 
 	if len(clauses) != 0 {
-		query += " WHERE " + strings.Join(clauses, " AND ")
+		if filter.OrderBy != "" {
+			query += strings.Join(clauses, " AND ")
+		} else {
+			query += " WHERE " + strings.Join(clauses, " AND ")
+		}
 	}
 
 	return query, args

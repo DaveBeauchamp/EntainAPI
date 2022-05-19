@@ -11,6 +11,9 @@ type Racing interface {
 	ListRaces(ctx context.Context, in *racing.ListRacesRequest) (*racing.ListRacesResponse, error)
 	// ListVisibleRaces will return a collection of all races that are flagged visible.
 	ListVisibleRaces(ctx context.Context, in *racing.ListRacesRequest) (*racing.ListRacesResponse, error)
+	// ListRacesByAdvertisedStartTime will return a collection of all races that are
+	// ordered by start time.
+	ListRacesByAdvertisedStartTime(ctx context.Context, in *racing.ListRacesRequest) (*racing.ListRacesResponse, error)
 }
 
 // racingService implements the Racing interface.
@@ -33,6 +36,15 @@ func (s *racingService) ListRaces(ctx context.Context, in *racing.ListRacesReque
 }
 
 func (s *racingService) ListVisibleRaces(ctx context.Context, in *racing.ListRacesRequest) (*racing.ListRacesResponse, error) {
+	races, err := s.racesRepo.List(in.Filter)
+	if err != nil {
+		return nil, err
+	}
+
+	return &racing.ListRacesResponse{Races: races}, nil
+}
+
+func (s *racingService) ListRacesByAdvertisedStartTime(ctx context.Context, in *racing.ListRacesRequest) (*racing.ListRacesResponse, error) {
 	races, err := s.racesRepo.List(in.Filter)
 	if err != nil {
 		return nil, err

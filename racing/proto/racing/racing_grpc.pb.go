@@ -24,7 +24,11 @@ const _ = grpc.SupportPackageIsVersion7
 type RacingClient interface {
 	// ListRaces will return a collection of all races.
 	ListRaces(ctx context.Context, in *ListRacesRequest, opts ...grpc.CallOption) (*ListRacesResponse, error)
+	// ListVisibleRaces will return a collection of all races that are flagged visible.
 	ListVisibleRaces(ctx context.Context, in *ListRacesRequest, opts ...grpc.CallOption) (*ListRacesResponse, error)
+	// ListRacesByAdvertisedStartTime will return a collection of all races that are
+	// ordered by start time.
+	ListRacesByAdvertisedStartTime(ctx context.Context, in *ListRacesRequest, opts ...grpc.CallOption) (*ListRacesResponse, error)
 }
 
 type racingClient struct {
@@ -53,13 +57,26 @@ func (c *racingClient) ListVisibleRaces(ctx context.Context, in *ListRacesReques
 	return out, nil
 }
 
+func (c *racingClient) ListRacesByAdvertisedStartTime(ctx context.Context, in *ListRacesRequest, opts ...grpc.CallOption) (*ListRacesResponse, error) {
+	out := new(ListRacesResponse)
+	err := c.cc.Invoke(ctx, "/racing.Racing/ListRacesByAdvertisedStartTime", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // RacingServer is the server API for Racing service.
 // All implementations should embed UnimplementedRacingServer
 // for forward compatibility
 type RacingServer interface {
 	// ListRaces will return a collection of all races.
 	ListRaces(context.Context, *ListRacesRequest) (*ListRacesResponse, error)
+	// ListVisibleRaces will return a collection of all races that are flagged visible.
 	ListVisibleRaces(context.Context, *ListRacesRequest) (*ListRacesResponse, error)
+	// ListRacesByAdvertisedStartTime will return a collection of all races that are
+	// ordered by start time.
+	ListRacesByAdvertisedStartTime(context.Context, *ListRacesRequest) (*ListRacesResponse, error)
 }
 
 // UnimplementedRacingServer should be embedded to have forward compatible implementations.
@@ -71,6 +88,9 @@ func (UnimplementedRacingServer) ListRaces(context.Context, *ListRacesRequest) (
 }
 func (UnimplementedRacingServer) ListVisibleRaces(context.Context, *ListRacesRequest) (*ListRacesResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ListVisibleRaces not implemented")
+}
+func (UnimplementedRacingServer) ListRacesByAdvertisedStartTime(context.Context, *ListRacesRequest) (*ListRacesResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListRacesByAdvertisedStartTime not implemented")
 }
 
 // UnsafeRacingServer may be embedded to opt out of forward compatibility for this service.
@@ -120,6 +140,24 @@ func _Racing_ListVisibleRaces_Handler(srv interface{}, ctx context.Context, dec 
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Racing_ListRacesByAdvertisedStartTime_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListRacesRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(RacingServer).ListRacesByAdvertisedStartTime(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/racing.Racing/ListRacesByAdvertisedStartTime",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(RacingServer).ListRacesByAdvertisedStartTime(ctx, req.(*ListRacesRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Racing_ServiceDesc is the grpc.ServiceDesc for Racing service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -134,6 +172,10 @@ var Racing_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ListVisibleRaces",
 			Handler:    _Racing_ListVisibleRaces_Handler,
+		},
+		{
+			MethodName: "ListRacesByAdvertisedStartTime",
+			Handler:    _Racing_ListRacesByAdvertisedStartTime_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
